@@ -11,6 +11,8 @@ import java.awt.Insets;
 import java.awt.MenuBar;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -33,12 +35,24 @@ import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellEditor;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
-import pop.dialog.NewNode;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import pop.dialog.EditNode;
 import tree.node.Info;
 import tree.node.LeafMap;
+import tree.node.MyTreeNode;
+import tree.node.MyTreeNodeListener;
 
 public class Start extends JFrame implements Handler{
 
@@ -47,9 +61,9 @@ public class Start extends JFrame implements Handler{
 	 */
 	private static final long serialVersionUID = 1L;
 	private JTree templateTree;
-	private DefaultMutableTreeNode templateRoot;
+	private MyTreeNode templateRoot;
 	private JTree sourceTree;
-	private DefaultMutableTreeNode sourceRoot;
+	private MyTreeNode sourceRoot;
 	private JPanel btnPanel;
 	private JButton equalBtn;
 	
@@ -70,16 +84,20 @@ public class Start extends JFrame implements Handler{
 		btnHandler = new ButtonHandler();
 		this.setLayout( new GridBagLayout() );
 		
-		templateRoot = new DefaultMutableTreeNode(new Info( "Template", false ) );
+		templateRoot = new MyTreeNode(new Info( "Template", false ) );
 		templateTree = new JTree(templateRoot);
-		templateTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-		createTree( "src/templateTree.txt", templateRoot );
+		templateTree.getSelectionModel().setSelectionMode(
+				TreeSelectionModel.SINGLE_TREE_SELECTION);
+		createTree( "src/templateTree.xml", templateRoot );
 		JScrollPane templatePane = new JScrollPane( templateTree );
 		
-		sourceRoot = new DefaultMutableTreeNode(new Info( "Source", false ));
+		sourceRoot = new MyTreeNode(new Info( "Source", false ));
 		sourceTree = new JTree(sourceRoot);
-		sourceTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-		createTree("src/sourceTree.txt", sourceRoot );
+		sourceTree.getSelectionModel().setSelectionMode(
+				TreeSelectionModel.SINGLE_TREE_SELECTION);
+		sourceTree.addTreeSelectionListener( new MyTreeNodeListener() );
+		sourceTree.addMouseListener( new MyMouseListener() );
+		createTree("src/sourceTree.xml", sourceRoot );
 		JScrollPane sourcePane = new JScrollPane(sourceTree);
 		
 		btnPanel = new JPanel();
@@ -159,49 +177,32 @@ public class Start extends JFrame implements Handler{
 		setVisible(true);
 	}
 
-	private DefaultMutableTreeNode getTreeNode( DefaultMutableTreeNode root, String name ){
-		Info info = (Info) root.getUserObject();
-		if( info.getName().equals(name) )return root;
-		DefaultMutableTreeNode child = null, value = null;
-		Enumeration<DefaultMutableTreeNode> children = root.children(); 
-		while( children.hasMoreElements() ){
-			child = children.nextElement();
-			value = getTreeNode(child, name);
-			if( value != null )return value;
-		}
-		return null;
-	}
-	private void createTree( String path, DefaultMutableTreeNode root ){
-		
-		int index = 0;
-		Info info = null;
-		String value = null;
-		String[] childs = null;
-		DefaultMutableTreeNode parent;
+	private void createTree( String path, MyTreeNode root ){
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		try {
-			File tree = new File(path);
-			Reader reader = new FileReader( tree );
-			@SuppressWarnings("resource")
-			BufferedReader buffered = new BufferedReader( reader );
-			while( (value = buffered.readLine()) != null ){
-				index = value.indexOf(':');
-				if( index <= 0 )continue;
-				parent = getTreeNode(root, value.substring(0, index ) );
-				if( parent == null )break;
-				info = (Info) parent.getUserObject();
-				info.setLeaf(true);
-				value = value.substring(index + 1 ).trim();
-				childs = value.split(" ");
-				for( int i = 0; i < childs.length; i++ ){
-					createTreeNode(parent, new Info( childs[i], i, 0,  true ) );
-				}
-			}
-		}catch (IOException e) {
+			File source = new File(path);
+			DocumentBuilder builder = factory.newDocumentBuilder();
+			Document doc = builder.parse(source);
+			Element book = doc.getDocumentElement();
+			iteratorCreateNode( root, book );
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	private DefaultMutableTreeNode createTreeNode( DefaultMutableTreeNode parent, Info info ){
-		DefaultMutableTreeNode child = new DefaultMutableTreeNode(info);
+	
+	private void iteratorCreateNode( MyTreeNode root, Node info ){
+		MyTreeNode treeNode = null;
+		NodeList subInfos = info.getChildNodes();
+		for( int i = 0; i < subInfos.getLength(); i++ ){
+			Node node = subInfos.item(i);
+			if( node.getNodeType() == Node.ELEMENT_NODE ){
+				treeNode = createTreeNode(root, node );
+				iteratorCreateNode( treeNode, node );
+			}	
+		}
+	}
+	private MyTreeNode createTreeNode( MyTreeNode parent, Object info ){
+		MyTreeNode child = new MyTreeNode(info);
 		parent.add( child );
 		return child;
 	}
@@ -214,7 +215,7 @@ public class Start extends JFrame implements Handler{
 
 	@Override
 	public void ActionPerformed( Object source) {
-		NewNode dialog = (NewNode) source;
+		EditNode dialog = (EditNode) source;
 		String name = dialog.getName();
 		if( name.equals("") ){
 			JOptionPane.showMessageDialog(null, "Name is blank");
@@ -229,38 +230,52 @@ public class Start extends JFrame implements Handler{
 		Info info = new Info(name, colum, dialog.getRow(), dialog.isLeaf() );
 
 		TreePath path = clicked.getSelectionPath();
-		DefaultMutableTreeNode parent = (DefaultMutableTreeNode) path.getLastPathComponent();
+		MyTreeNode parent = (MyTreeNode) path.getLastPathComponent();
 		createTreeNode(parent, info );
 	}
-	
+	class MyMouseListener extends MouseAdapter {
+		@Override
+		public void mousePressed(MouseEvent e) {
+			JTree source= (JTree) e.getSource();
+			int selRow = source.getRowForLocation( e.getX(), e.getY() );
+			TreePath path = source.getPathForLocation(e.getX(), e.getY());
+			if( selRow < 0 )return ;
+			if( e.getButton() == MouseEvent.BUTTON3 ){
+				new EditNode(self);
+			}
+		}
+	}
+
 	class ButtonHandler implements ActionListener{
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			
-			DefaultMutableTreeNode s = null;
-			DefaultMutableTreeNode t = null;
+			MyTreeNode s = null;
+			MyTreeNode t = null;
 			AbstractButton btn = (AbstractButton) e.getSource();
 			System.out.println( btn.getText() );
 			switch( btn.getText() ){
 			case "=":
-				s = (DefaultMutableTreeNode) sourceTree.getLastSelectedPathComponent();
-				t = (DefaultMutableTreeNode) templateTree.getLastSelectedPathComponent();
+				s = (MyTreeNode) sourceTree.getLastSelectedPathComponent();
+				t = (MyTreeNode) templateTree.getLastSelectedPathComponent();
 				model.addElement( new LeafMap( s,"=", t )) ;
 				break;
 			case "<":
-				s = (DefaultMutableTreeNode) sourceTree.getLastSelectedPathComponent();
-				t = (DefaultMutableTreeNode) templateTree.getLastSelectedPathComponent();
+				s = (MyTreeNode) sourceTree.getLastSelectedPathComponent();
+				t = (MyTreeNode) templateTree.getLastSelectedPathComponent();
 				model.addElement( new LeafMap( s,"<", t )) ;
 				break;
 			case ">":
-				s = (DefaultMutableTreeNode) sourceTree.getLastSelectedPathComponent();
-				t = (DefaultMutableTreeNode) templateTree.getLastSelectedPathComponent();
+				s = (MyTreeNode) sourceTree.getLastSelectedPathComponent();
+				t = (MyTreeNode) templateTree.getLastSelectedPathComponent();
 				model.addElement( new LeafMap( s,">", t )) ;
 				break;
 			case "Remove":
 				int index = mapList.getSelectedIndex();
-				model.remove(index);
+				if( index > 0 ){
+					model.remove(index);
+				}
 				break;
 				default:
 			}

@@ -1,0 +1,45 @@
+<?xml version="1.0" ?>
+<book name="source.xlsx">
+    <sheet name="Description">
+        <field name="ProjectManager" row="0" colum="0"></field>
+        <field name="Applicant" row="0" colum="0"></field>
+        <field name="RequstNo" row="0" colum="0"></field>
+        <field name="Voyage" row="0" colum="0"></field>
+        <field name="StationNo" row="0" colum="0"></field>
+        <field name="SampleName" row="0" colum="0"></field>
+        <field name="SampleNo" row="0" colum="0"></field>
+        <field name="Number" row="0" colum="0"></field>
+        <field name="Amount" row="0" colum="0"></field>
+        <field name="Depth" row="0" colum="0"></field>
+        <field name="Length" row="0" colum="0"></field>
+        <field name="Target" row="0" colum="0"></field>
+        <field name="Comment" row="0" colum="0"></field>
+    </sheet>
+    <sheet name="MajorElement">
+        <field name="SampleNo" row="0" colum="0"></field>
+        <field name="TestNo" row="0" colum="0"></field>
+        <field name="EntrustInstitution" row="0" colum="0"></field>
+        <field name="TestType" row="0" colum="0"></field>
+        <field name="TestInstrument" row="0" colum="0"></field>
+        <field name="Si" row="0" colum="0"></field>
+        <field name="Ti" row="0" colum="0"></field>
+        <field name="Al" row="0" colum="0"></field>
+        <field name="Fe" row="0" colum="0"></field>
+        <field name="FeO" row="0" colum="0"></field>
+        <field name="FeT" row="0" colum="0"></field>
+        <field name="Mn" row="0" colum="0"></field>
+        <field name="Mg" row="0" colum="0"></field>
+        <field name="Ca" row="0" colum="0"></field>
+        <field name="Na" row="0" colum="0"></field>
+        <field name="K" row="0" colum="0"></field>
+        <field name="P" row="0" colum="0"></field>
+        <field name="Au" row="0" colum="0"></field>
+        <field name="Ag" row="0" colum="0"></field>
+        <field name="LOI" row="0" colum="0"></field>
+        <field name="C" row="0" colum="0"></field>
+        <field name="H2O+" row="0" colum="0"></field>
+        <field name="H2O-" row="0" colum="0"></field>
+        <field name="OrganicCarbon" row="0" colum="0"></field>
+        <field name="Total" row="0" colum="0"></field>
+    </sheet>
+</book>

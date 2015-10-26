@@ -1,3 +1,0 @@
-Source:Description MajorElement MicroElement RareEarthElement 
-Description:ProjectManager Applicant RequstNo Voyage StationNo SampleName SampleNo Number Amount Depth Length Target Comment
-MajorElement:SampleNo TestNo EntrustInstitution TestType TestInstrument Si Ti Al Fe FeO FeT Mn Mg Ca Na K P Au Ag LOI C H2O+ H2O- OrganicCarbon Total

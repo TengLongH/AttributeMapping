@@ -5,7 +5,7 @@ MicroElement:SampleNo TestNo TestInstitution TestMethod TestInstrument Li Be Sc 
 RareEarthElement: SampleNo TestNo TestInstitution TestMethod TestInstrument La Ce Pr Nd Sm Eu Gd Tb Dy Ho Er Tm Yb Lu
 PreciousMetals: SampleNo TestNo TestInstitution TestMethod TestInstrument Au Ag
 PGE:SampleNo TestNo TestInstitution TestMethod TestInstrument Ru Rh Pd Os Ir Pt
-GranularityAnalysis:SampleNo TestNo TestInstitution TestMethod TestInstrument <-1¦Õ ¡­¡­ >11 GravelSand Silt
+GranularityAnalysis:SampleNo TestNo TestInstitution TestMethod TestInstrument GravelSand Silt
 IsotopicAnalysis:SampleNo TestNo TestInstitution TestMethod TestInstrument
 AppliedMechanic:SampleNo TestNo TestInstitution TestMethod TestInstrument
 EngineeringPhysics:SampleNo TestNo TestInstitution TestMethod TestInstrument

@@ -1,5 +1,6 @@
 package pop.dialog;
 
+import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -18,8 +19,7 @@ import javax.swing.JTextField;
 import main.Handler;
 import main.Start;
 
-public class NewNode extends JDialog {
-
+public class EditNode extends JDialog {
 	/**
 	 * 
 	 */
@@ -34,7 +34,7 @@ public class NewNode extends JDialog {
 	private JPanel rowPanel;
 	private Handler handle;
 	private JDialog self ;
-	public NewNode( Handler h ){
+	public EditNode( Handler h ){
 		super( (Frame)null, "CreateNewNode");
 		handle = h;
 		self = this;
@@ -76,13 +76,15 @@ public class NewNode extends JDialog {
 		add( rowPanel );
 		
 		JButton yesBtn = new JButton("Yes");
+		yesBtn.addActionListener(actionHandler);
 		JButton cancelBtn = new JButton("Cancel");
+		cancelBtn.addActionListener(actionHandler);
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.add(yesBtn);
 		buttonPanel.add(cancelBtn);
 		add( buttonPanel );
 		
-		pack();
+		setSize(new Dimension( 300 , 300));
 		setLocationRelativeTo(null);
 		setVisible(true);
 	}
@@ -126,11 +128,13 @@ public class NewNode extends JDialog {
 				leaf =false;
 				columField.setEditable(leaf);
 				rowField.setEnabled(leaf);
+				rowField.setVisible(leaf);
 				break;
 			case "Leaf":
 				leaf = true;
 				columField.setEditable(leaf);
 				rowField.setEnabled(leaf);
+				rowField.setVisible(leaf);
 				break;
 			case "Yes":
 				handle.ActionPerformed(source);
